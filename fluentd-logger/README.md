@@ -8,6 +8,17 @@ Fluentd logging library used to support standardized testing.
 java -cp target/fluentd-logger-1.0-SNAPSHOT-jar-with-dependencies.jar "Main" -tag tag -file testResults.json -fluentd 127.0.0.1:24224
 ```
 
+## Artifact maven central
+
+```xml
+
+<dependency>
+  <groupId>com.github.estuaryoss.libs</groupId>
+  <artifactId>fluentd-logger</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
+```
+
 ### Set Fluentd IP:PORT location
 
 There are 3 ways to set the location of fluentd IP:PORT:

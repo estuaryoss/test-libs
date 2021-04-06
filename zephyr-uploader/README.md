@@ -10,6 +10,17 @@ java -cp zephyr-uploader.jar "Main" -username auto-robot -password mySecretPassw
 -noOfThreads=10 -folderName=Results -recreateFolder=false 
 ```
 
+## Artifact maven central
+
+```xml
+
+<dependency>
+  <groupId>com.github.estuaryoss.libs</groupId>
+  <artifactId>zephyr-uploader</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
+```
+
 ## Programmatic example
 
 ```java
