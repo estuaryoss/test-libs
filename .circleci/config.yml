@@ -1,0 +1,48 @@
+version: 2 # use CircleCI 2.0
+jobs: # a collection of steps
+  build: # runs not using Workflows must have a `build` job as entry point
+
+    working_directory: ~/test-libs # directory where steps will run
+
+    docker: # run the steps with Docker
+      - image: circleci/openjdk:11.0.3-jdk-stretch
+
+    steps: # a collection of executable commands
+
+      - checkout # check out source code to working directory
+      - run:
+          command: printenv
+          name: "print env vars"
+      - run:
+          command: cd fluentd-logger && mvn clean package
+          environment:
+          name: "clean package fluentd-logger"
+      - run:
+          command: cd excel-generator && mvn clean package
+          environment:
+          name: "clean package excel-generator"
+      - run:
+          command: cd zephyr-uploader && mvn clean package
+          environment:
+          name: "clean package zephyr-uploader"
+      - run:
+          command: sudo apt-get update
+          name: "apt-get update"
+      - run:
+          command: sudo apt-get install gnupg2
+          name: "install gnupg2"
+      #      - run:
+      #          command: export GPG_KEYNAME=$(gpg2 --list-keys | head -4 | tail -1 |  sed 's/^\s+//g') && mvn -s settings.xml clean deploy -DskipTests=true
+      #          name: "deploy"
+
+      # -> for new gpg2 key: export GNUPGHOME="$(mktemp -d)" && export GPG_TTY=$(tty) && gpg --batch --generate-key .circleci/gpgtemplate &&
+
+      - store_artifacts: # store the jar as an artifact
+          # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: excel-generator/target/excel-generator-1.0-SNAPSHOT-jar-with-dependencies.jar
+      - store_artifacts: # store the jar as an artifact
+          # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: fluentd-logger/target/fluentd-logger-1.0-SNAPSHOT-jar-with-dependencies.jar
+      - store_artifacts: # store the jar as an artifact
+          # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: zephyr-uploader/target/zephyr-uploader-1.0-SNAPSHOT-jar-with-dependencies.jar

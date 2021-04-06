@@ -1,0 +1,29 @@
+[
+  {
+    "testId": "AIP-1",
+    "testName": "exampleTest1",
+    "Db": "Mysql57",
+    "OS": "Centos7",
+    "logLocation": "http://logdatabase.com/exampleTest1",
+    "startedat": "Sun Nov  1 10:16:52 EET 2020",
+    "endedat": "Sun Nov  1 10:22:52 EET 2020"
+  },
+  {
+    "testId": "AIP-2",
+    "testName": "exampleTest2",
+    "Db": "Mysql57",
+    "OS": "Centos7",
+    "logLocation": "http://logdatabase.com/exampleTest2",
+    "startedat": "Sun Nov  1 10:22:52 EET 2020",
+    "endedat": "Sun Nov  1 10:30:52 EET 2020"
+  },
+  {
+    "testId": "AIP-3",
+    "testName": "exampleTest3",
+    "Db": "Mysql57",
+    "OS": "Centos7",
+    "logLocation": "http://logdatabase.com/exampleTest3",
+    "startedat": "Sun Nov  1 10:22:52 EET 2020",
+    "endedat": "Sun Nov  1 10:30:52 EET 2020"
+  }
+]
