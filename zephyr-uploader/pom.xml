@@ -8,6 +8,32 @@
     <artifactId>zephyr-uploader</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <developers>
+        <developer>
+            <name>Catalin Dinuta</name>
+            <email>constantin.dinuta@gmail.com</email>
+            <organization>Estuary</organization>
+            <organizationUrl>https://estuaryoss.github.io</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/estuaryoss/test-libs.git</connection>
+        <developerConnection>scm:git:ssh://github.com:estuaryoss/test-libs.git</developerConnection>
+        <url>https://github.com/estuaryoss/test-libs/tree/main</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <java.version>11</java.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
