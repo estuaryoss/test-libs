@@ -3,8 +3,10 @@ package com.github.estuaryoss.libs.zephyruploader;
 import com.github.estuaryoss.libs.zephyruploader.constants.CliConstants;
 import com.github.estuaryoss.libs.zephyruploader.constants.EnvConstants;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
+import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
 import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.enums.ConfigProperty;
+import lv.ctco.zephyr.service.AuthService;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -26,17 +28,20 @@ public class Main {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java -cp " +
                     CliConstants.ARTIFACT_NAME + ".jar Main -" +
-                    CliConstants.USERNAME + String.format("<%s> -", CliConstants.USERNAME) +
-                    CliConstants.PASSWORD + String.format("<%s> -", CliConstants.PASSWORD) +
-                    CliConstants.JIRA_URL + String.format("<%s> -", CliConstants.JIRA_URL) +
-                    CliConstants.PROJECT_KEY + String.format("<%s> -", CliConstants.PROJECT_KEY) +
-                    CliConstants.RELEASE_VERSION + String.format("<%s> -", CliConstants.RELEASE_VERSION) +
-                    CliConstants.TEST_CYCLE + String.format("<%s> -", CliConstants.TEST_CYCLE) +
-                    CliConstants.NO_OF_THREADS + String.format("<%s> -", CliConstants.NO_OF_THREADS) +
-                    CliConstants.RECREATE_FOLDER + String.format("<%s> -", CliConstants.RECREATE_FOLDER) +
-                    CliConstants.REPORT_PATH + String.format("<%s> -", CliConstants.REPORT_PATH) +
-                    CliConstants.EXECUTION_STATUS_COLUMN + String.format("<%s> -", CliConstants.EXECUTION_STATUS_COLUMN) +
-                    CliConstants.COMMENTS_COLUMN + String.format("<%s> -", CliConstants.COMMENTS_COLUMN), cliParser.getOptions());
+                    CliConstants.USERNAME + String.format(" <%s> -", CliConstants.USERNAME) +
+                    CliConstants.PASSWORD + String.format(" <%s> -", CliConstants.PASSWORD) +
+                    CliConstants.JIRA_URL + String.format(" <%s> -", CliConstants.JIRA_URL) +
+                    CliConstants.PROJECT_KEY + String.format(" <%s> -", CliConstants.PROJECT_KEY) +
+                    CliConstants.RELEASE_VERSION + String.format(" <%s> -", CliConstants.RELEASE_VERSION) +
+                    CliConstants.TEST_CYCLE + String.format(" <%s> -", CliConstants.TEST_CYCLE) +
+                    CliConstants.NO_OF_THREADS + String.format(" <%s> -", CliConstants.NO_OF_THREADS) +
+                    CliConstants.RECREATE_FOLDER + String.format(" <%s> -", CliConstants.RECREATE_FOLDER) +
+                    CliConstants.REPORT_PATH + String.format(" <%s> -", CliConstants.REPORT_PATH) +
+                    CliConstants.EXECUTION_STATUS_COLUMN + String.format(" <%s> -", CliConstants.EXECUTION_STATUS_COLUMN) +
+                    CliConstants.COMMENTS_COLUMN + String.format(" <%s>", CliConstants.COMMENTS_COLUMN), cliParser.getOptions());
+            assertZephyrConfigIsSet(zephyrConfig);
+
+            System.exit(ERROR);
         }
 
         assertZephyrConfigIsSet(zephyrConfig);
@@ -49,7 +54,8 @@ public class Main {
         config.setValue(ConfigProperty.RELEASE_VERSION, zephyrConfig.getReleaseVersion());
         config.setValue(ConfigProperty.TEST_CYCLE, zephyrConfig.getTestCycle());
 
-        ZephyrUploader zephyrUploader = new ZephyrUploader(config);
+        ZephyrUploader zephyrUploader = new ZephyrUploader(zephyrConfig,
+                new AuthService(config), new ZephyrService(config));
 
         zephyrUploader.updateJiraZephyr(zephyrConfig);
 
@@ -68,18 +74,25 @@ public class Main {
 
     private static void assertZephyrConfigIsSet(ZephyrConfig zephyrConfig) {
         assertThat(zephyrConfig.getUsername()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.USERNAME + " arg was not set. Set this argument or use the env var: " + EnvConstants.USERNAME);
+                .withFailMessage(CliConstants.USERNAME + " arg was not set. Set this argument or use the env var: " + EnvConstants.USERNAME)
+                .isNotEqualTo(null);
         assertThat(zephyrConfig.getUsername()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.PASSWORD + " arg was not set. Set this argument or use the env var: " + EnvConstants.PASSWORD);
+                .withFailMessage(CliConstants.PASSWORD + " arg was not set. Set this argument or use the env var: " + EnvConstants.PASSWORD)
+                .isNotEqualTo(null);
+        assertThat(zephyrConfig.getJiraUrl())
+                .withFailMessage(CliConstants.JIRA_URL + " arg was not set. Set this argument or use the env var: " + EnvConstants.JIRA_URL)
+                .isNotEqualTo(null);
+        assertThat(zephyrConfig.getJiraUrl())
+                .withFailMessage(CliConstants.PROJECT_KEY + " arg was not set. Set this argument or use the env var: " + EnvConstants.PROJECT_KEY)
+                .isNotEqualTo(null);
+        assertThat(zephyrConfig.getJiraUrl())
+                .withFailMessage(CliConstants.RELEASE_VERSION + " arg was not set. Set this argument or use the env var: " + EnvConstants.RELEASE_VERSION)
+                .isNotEqualTo(null);
         assertThat(zephyrConfig.getJiraUrl()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.JIRA_URL + " arg was not set. Set this argument or use the env var: " + EnvConstants.JIRA_URL);
+                .withFailMessage(CliConstants.TEST_CYCLE + " arg was not set. Set this argument or use the env var: " + EnvConstants.TEST_CYCLE)
+                .isNotEqualTo(null);
         assertThat(zephyrConfig.getJiraUrl()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.PROJECT_KEY + " arg was not set. Set this argument or use the env var: " + EnvConstants.PROJECT_KEY);
-        assertThat(zephyrConfig.getJiraUrl()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.RELEASE_VERSION + " arg was not set. Set this argument or use the env var: " + EnvConstants.RELEASE_VERSION);
-        assertThat(zephyrConfig.getJiraUrl()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.TEST_CYCLE + " arg was not set. Set this argument or use the env var: " + EnvConstants.TEST_CYCLE);
-        assertThat(zephyrConfig.getJiraUrl()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.REPORT_PATH + " arg was not set. Set this argument or use the env var: " + EnvConstants.REPORT_PATH);
+                .withFailMessage(CliConstants.REPORT_PATH + " arg was not set. Set this argument or use the env var: " + EnvConstants.REPORT_PATH)
+                .isNotEqualTo(null);
     }
 }

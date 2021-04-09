@@ -26,27 +26,24 @@ public class ExcelReader {
         return workbook;
     }
 
-    public static String[][] readExcel(String excelFilePath) {
-        String[][] data = new String[0][];
-        try {
-            Sheet sheet = getExcelWorkbook(excelFilePath).getSheetAt(0); //first sheet
-            Row row;
-            int nrOfRows = sheet.getPhysicalNumberOfRows();
-            int nrOfColumns = sheet.getRow(0).getLastCellNum();
-            data = new String[nrOfRows][nrOfColumns];
+    public static String[][] readExcel(String excelFilePath) throws IOException {
+        String[][] data;
 
-            for (int i = 0; i < nrOfRows; i++) {
-                row = sheet.getRow(i);
-                for (int j = 0; j < nrOfColumns; j++) {
-                    try {
-                        data[i][j] = row.getCell(j).getStringCellValue();
-                    } catch (NullPointerException e) {
-                        data[i][j] = "";
-                    }
+        Sheet sheet = getExcelWorkbook(excelFilePath).getSheetAt(0); //first sheet
+        Row row;
+        int nrOfRows = sheet.getPhysicalNumberOfRows();
+        int nrOfColumns = sheet.getRow(0).getLastCellNum();
+        data = new String[nrOfRows][nrOfColumns];
+
+        for (int i = 0; i < nrOfRows; i++) {
+            row = sheet.getRow(i);
+            for (int j = 0; j < nrOfColumns; j++) {
+                try {
+                    data[i][j] = row.getCell(j).getStringCellValue();
+                } catch (NullPointerException e) {
+                    data[i][j] = "";
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return data;

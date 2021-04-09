@@ -14,28 +14,27 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ZephyrUploader {
     private static final Logger log = LoggerFactory.getLogger(ZephyrUploader.class);
     private static AuthService authService;
-    private static Config config;
     ZephyrService zephyrService;
+    private Config config = new Config();
     Map<String, List<String>> excelData;
 
-    public ZephyrUploader(Config config) {
-        this.config = config;
-        authService = new AuthService(config);
-        zephyrService = new ZephyrService(config);
+    public ZephyrUploader(ZephyrConfig zephyrConfig, AuthService authService, ZephyrService zephyrService) {
+        this.authService = authService;
+        this.zephyrService = zephyrService;
+
+        setConfig(zephyrConfig);
     }
 
-    public static Config getConfig() {
-        return config;
+    public Config getConfig() {
+        return this.config;
     }
 
-    public static void setConfig(ZephyrConfig zephyrConfig) {
+    public void setConfig(ZephyrConfig zephyrConfig) {
         config.setValue(ConfigProperty.USERNAME, zephyrConfig.getUsername());
         config.setValue(ConfigProperty.PASSWORD, zephyrConfig.getPassword());
         config.setValue(ConfigProperty.JIRA_URL, zephyrConfig.getJiraUrl());
@@ -80,13 +79,25 @@ public class ZephyrUploader {
                 .projectId(projectId)
                 .versionId(versionId);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
-        List<Thread> zephyrExecutions = getZephyrExecutionList(zephyrMetaInfo, zephyrConfig);
+        BlockingQueue jobQueue = new LinkedBlockingQueue<Runnable>();
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS, jobQueue);
 
-        zephyrExecutions.forEach(zephyrExecution -> executorService.execute(zephyrExecution));
+        List<Callable> zephyrExecutions = getZephyrExecutionsList(zephyrMetaInfo, zephyrConfig);
 
         log.info("Executing with a maximum thread pool of: " + poolSize);
-        executorService.shutdown();
+
+        zephyrExecutions.forEach(zephyrExecution -> {
+            executor.submit(zephyrExecution);
+        });
+
+        while (executor.getActiveCount() > 0 && jobQueue.size() > 0) {
+            //wait to complete
+            Thread.sleep(1000);
+        }
+
+        //wait for others to finish also
+        Thread.sleep(5000);
+        executor.shutdown();
     }
 
     private Map<String, List<String>> getMapForExecutionDetails(String[][] excelData) {
@@ -97,18 +108,19 @@ public class ZephyrUploader {
     }
 
 
-    private List<Thread> getZephyrExecutionList(ZephyrMetaInfo zephyrMetaInfo, ZephyrConfig zephyrConfig) {
-        List<Thread> threadList = new ArrayList<>();
+    private List<Callable> getZephyrExecutionsList(ZephyrMetaInfo zephyrMetaInfo, ZephyrConfig zephyrConfig) {
+        List<Callable> threadList = new ArrayList<>();
         for (String key : excelData.keySet()) {
-            Runnable runnable = () -> {
+            Callable callable = () -> {
                 try {
                     createAndUpdateZephyrExecution(zephyrMetaInfo, zephyrConfig, key);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                return null;
             };
-            Thread t = new Thread(runnable, key);
-            threadList.add(t);
+            threadList.add(callable);
             log.info(String.format("### Thread %s added to the list ###", key));
         }
         return threadList;
@@ -124,7 +136,7 @@ public class ZephyrUploader {
 
         if (excelData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.SUCCESS.getStatus())) {
             zephyrService.updateExecutionId(executionId,
-                    TestStatus.PASSED.getId(), excelData.get(key).get(zephyrCfg.getExecutionStatusColumn()));
+                    TestStatus.PASSED.getId(), excelData.get(key).get(zephyrCfg.getCommentsColumn()));
         } else if (excelData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.FAILURE.getStatus())) {
             zephyrService.updateExecutionId(executionId,
                     TestStatus.FAILED.getId(), excelData.get(key).get(zephyrCfg.getCommentsColumn()));
@@ -133,6 +145,7 @@ public class ZephyrUploader {
                     TestStatus.NOT_EXECUTED.getId(), excelData.get(key).get(zephyrCfg.getCommentsColumn()));
         }
     }
+
 }
 
 
