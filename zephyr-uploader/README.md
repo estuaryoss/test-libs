@@ -6,8 +6,8 @@ Upload test results in Jira Zephyr library used to support standardized testing.
 
 ```bash
 java -cp zephyr-uploader.jar "Main" -username auto-robot -password mySecretPasswd123! \
--jiraUrl=http://jira.yourcompany.com/rest/ -projectKey=AIP -releaseVersion=1.2-UP2020 -testCycle=Regression -reportPath=Regression_FTP.xls \
--noOfThreads=10 -folderName=Results -recreateFolder=false 
+-jiraUrl http://jira.yourcompany.com/rest/ -projectKey AIP -releaseVersion 1.2-UP2020 -testCycle Regression -reportPath Regression_FTP.xls \
+-noOfThreads=10 -folderName Results -recreateFolder false 
 ```
 
 ## Artifact maven central
@@ -17,7 +17,7 @@ java -cp zephyr-uploader.jar "Main" -username auto-robot -password mySecretPassw
 <dependency>
   <groupId>com.github.estuaryoss.libs</groupId>
   <artifactId>zephyr-uploader</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1</version>
 </dependency>
 ```
 
@@ -43,8 +43,8 @@ Environment env=new Environment();
         config.setValue(ConfigProperty.RELEASE_VERSION,zephyrConfig.getReleaseVersion());
         config.setValue(ConfigProperty.TEST_CYCLE,zephyrConfig.getTestCycle());
 
-        ZephyrUploader zephyrUploader=new ZephyrUploader(config);
-        zephyrUploader.updateJiraZephyrMultiThread(zephyrConfig);
+        ZephyrUploader zephyrUploader=new ZephyrUploader(zephyrConfig,new AuthService(config),new ZephyrService(config));
+        zephyrUploader.updateJiraZephyr(zephyrConfig);
 ```
 
 ## ! Keep in mind
@@ -56,3 +56,8 @@ Environment env=new Environment();
   E.g. -executionStatusColumn=6
 - You also can specify the comments column. For example the link where the test logs are. The default is 8'th column.   
   E.g. -commentsColumn=8
+
+## Precedence
+
+The arguments set with 'java -cp' are stronger than the ones from environment (env vars or 'environment.properties'
+file).
