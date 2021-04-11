@@ -1,7 +1,6 @@
 package com.github.estuaryoss.libs.zephyruploader;
 
 import com.github.estuaryoss.libs.zephyruploader.constants.CliConstants;
-import com.github.estuaryoss.libs.zephyruploader.constants.EnvConstants;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
 import org.apache.commons.cli.HelpFormatter;
@@ -60,26 +59,26 @@ public class Main {
     }
 
     private static void assertZephyrConfigIsSet(ZephyrConfig zephyrConfig) {
-        assertThat(zephyrConfig.getUsername()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.USERNAME + " arg was not set. Set this argument or use the env var: " + EnvConstants.USERNAME)
+        assertThat(zephyrConfig.getUsername())
+                .withFailMessage(CliConstants.USERNAME + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.USERNAME + "'")
                 .isNotEqualTo(null);
-        assertThat(zephyrConfig.getUsername()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.PASSWORD + " arg was not set. Set this argument or use the env var: " + EnvConstants.PASSWORD)
-                .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.JIRA_URL + " arg was not set. Set this argument or use the env var: " + EnvConstants.JIRA_URL)
+        assertThat(zephyrConfig.getUsername())
+                .withFailMessage(CliConstants.PASSWORD + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.PASSWORD + "'")
                 .isNotEqualTo(null);
         assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.PROJECT_KEY + " arg was not set. Set this argument or use the env var: " + EnvConstants.PROJECT_KEY)
+                .withFailMessage(CliConstants.JIRA_URL + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.JIRA_URL + "'")
                 .isNotEqualTo(null);
         assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.RELEASE_VERSION + " arg was not set. Set this argument or use the env var: " + EnvConstants.RELEASE_VERSION)
+                .withFailMessage(CliConstants.PROJECT_KEY + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.PROJECT_KEY + "'")
                 .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.TEST_CYCLE + " arg was not set. Set this argument or use the env var: " + EnvConstants.TEST_CYCLE)
+        assertThat(zephyrConfig.getJiraUrl())
+                .withFailMessage(CliConstants.RELEASE_VERSION + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.RELEASE_VERSION + "'")
                 .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl()).isNotEqualTo(null)
-                .withFailMessage(CliConstants.REPORT_PATH + " arg was not set. Set this argument or use the env var: " + EnvConstants.REPORT_PATH)
+        assertThat(zephyrConfig.getJiraUrl())
+                .withFailMessage(CliConstants.TEST_CYCLE + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.TEST_CYCLE + "'")
+                .isNotEqualTo(null);
+        assertThat(zephyrConfig.getJiraUrl())
+                .withFailMessage(CliConstants.REPORT_PATH + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.REPORT_PATH + "'")
                 .isNotEqualTo(null);
     }
 }

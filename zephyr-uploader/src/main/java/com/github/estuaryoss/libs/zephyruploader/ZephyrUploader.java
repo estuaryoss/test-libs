@@ -50,11 +50,12 @@ public class ZephyrUploader {
             folderId = zephyrService.createFolderForCycle(projectId, versionId, cycleId, folderNameWithDatestamp);
         }
 
-        ZephyrMetaInfo zephyrMetaInfo = new ZephyrMetaInfo()
+        ZephyrMetaInfo zephyrMetaInfo = ZephyrMetaInfo.builder()
                 .folderId(folderId)
                 .cycleId(cycleId)
                 .projectId(projectId)
-                .versionId(versionId);
+                .versionId(versionId)
+                .build();
 
         BlockingQueue jobQueue = new LinkedBlockingQueue<Runnable>();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS, jobQueue);
