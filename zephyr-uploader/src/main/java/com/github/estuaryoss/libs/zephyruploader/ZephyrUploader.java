@@ -1,11 +1,11 @@
 package com.github.estuaryoss.libs.zephyruploader;
 
 import com.github.estuaryoss.libs.zephyruploader.model.TestExecutionStatus;
+import com.github.estuaryoss.libs.zephyruploader.model.TestStatus;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
 import com.github.estuaryoss.libs.zephyruploader.utils.ExcelReader;
-import lv.ctco.zephyr.enums.TestStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -7,7 +7,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
-import org.apache.http.HttpStatus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -21,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ZephyrService {
     private static final Logger log = LoggerFactory.getLogger(ZephyrService.class);
+    private final int HTTP_STATUS_OK = 200;
     private final ZephyrConfig zephyrConfig;
 
 
@@ -34,7 +34,7 @@ public class ZephyrService {
         RequestSpecification request = RestAssured.given().log().uri();
         Response httpResponse = request.get("api/2/project/" + projectKey);
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to get project described by projectKey=%s, responseBody=%s", projectKey,
                         httpResponse.getBody().asString()));
 
@@ -45,7 +45,7 @@ public class ZephyrService {
         RequestSpecification request = RestAssured.given().log().uri();
         Response httpResponse = request.get("api/2/issue/" + issueKey);
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to get issue described by key =%s, responseBody=%s", issueKey,
                         httpResponse.getBody().asString()));
 
@@ -58,7 +58,7 @@ public class ZephyrService {
                 .queryParam("projectId", projectId);
         Response httpResponse = request.get(String.format("zapi/latest/cycle/%s/folders", cycleId));
         ResponseBody responseBody = httpResponse.getBody();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to get folders for cycleId=%s, versionId=%s, projectId=%s, responseBody=%s",
                         cycleId, versionId, projectId, responseBody.asString()));
 
@@ -87,7 +87,7 @@ public class ZephyrService {
 
         Response httpResponse = request.get("zapi/latest/cycle");
         ResponseBody responseBody = httpResponse.getBody();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to get cycleId for cycleName=%s, versionId=%s, projectId=%s, responseBody=%s",
                         cycleName, versionId, projectId, responseBody.asString()));
 
@@ -114,7 +114,7 @@ public class ZephyrService {
 
         Response httpResponse = request.get(String.format("zapi/latest/cycle/%s/folders", cycleId));
         String responseBody = httpResponse.getBody().asString();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to get folders for cycleId=%s, versionId=%s, projectId=%s, responseBody=%s",
                         cycleId, versionId, projectId, responseBody));
 
@@ -135,7 +135,7 @@ public class ZephyrService {
         ResponseBody responseBody = httpResponse.getBody();
         Integer id = (Integer) responseBody.as(Map.class).get("id");
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to create folder=%s for cycleId=%s, requestBody=%s, responseBody=%s",
                         folderName, cycleId, jsonBody.toString(), responseBody.asString()));
 
@@ -151,7 +151,7 @@ public class ZephyrService {
         Response httpResponse = request.delete(String.format("zapi/latest/folder/%s", (int) folderId));
         ResponseBody responseBody = httpResponse.getBody();
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("### Failed to delete folderId=%s for versionId=%s, projectId=%s, cycled=%s, responseBody=%s ###",
                         folderId, versionId, projectId, cycleId, responseBody));
     }
@@ -174,7 +174,7 @@ public class ZephyrService {
         ResponseBody responseBody = httpResponse.getBody();
         String id = (String) responseBody.as(JSONObject.class).keySet().toArray()[0];
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to create new execution for issueId=%s, requestBody=%s, responseBody=%s",
                         issueId, jsonBody.toString(), responseBody));
 
@@ -193,7 +193,7 @@ public class ZephyrService {
                 .put(String.format("zapi/latest/execution/%s/execute", executionId));
         ResponseBody responseBody = httpResponse.getBody();
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to update execution id=%s, requestBody=%s, responseBody=%s",
                         executionId, jsonBody.toJSONString(), responseBody));
     }
@@ -204,7 +204,7 @@ public class ZephyrService {
 
         Response httpResponse = request.get("zapi/latest/util/versionBoard-list");
         ResponseBody responseBody = httpResponse.getBody();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
                 .withFailMessage(String.format("Failed to get version for versionName=%s and projectId=%s, responseBody=%s",
                         versionName, projectId, responseBody));
 
