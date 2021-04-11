@@ -4,9 +4,6 @@ import com.github.estuaryoss.libs.zephyruploader.constants.CliConstants;
 import com.github.estuaryoss.libs.zephyruploader.constants.EnvConstants;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
-import lv.ctco.zephyr.Config;
-import lv.ctco.zephyr.enums.ConfigProperty;
-import lv.ctco.zephyr.service.AuthService;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -46,18 +43,8 @@ public class Main {
 
         assertZephyrConfigIsSet(zephyrConfig);
 
-        Config config = new Config();
-        config.setValue(ConfigProperty.USERNAME, zephyrConfig.getUsername());
-        config.setValue(ConfigProperty.PASSWORD, zephyrConfig.getPassword());
-        config.setValue(ConfigProperty.JIRA_URL, zephyrConfig.getJiraUrl());
-        config.setValue(ConfigProperty.PROJECT_KEY, zephyrConfig.getProjectKey());
-        config.setValue(ConfigProperty.RELEASE_VERSION, zephyrConfig.getReleaseVersion());
-        config.setValue(ConfigProperty.TEST_CYCLE, zephyrConfig.getTestCycle());
-
-        ZephyrUploader zephyrUploader = new ZephyrUploader(zephyrConfig,
-                new AuthService(config), new ZephyrService(config));
-
-        zephyrUploader.updateJiraZephyr(zephyrConfig);
+        ZephyrUploader zephyrUploader = new ZephyrUploader(new ZephyrService(zephyrConfig));
+        zephyrUploader.updateJiraZephyr();
 
         System.exit(SUCCESS);
     }

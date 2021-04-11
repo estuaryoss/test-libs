@@ -5,10 +5,7 @@ import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
 import com.github.estuaryoss.libs.zephyruploader.utils.ExcelReader;
-import lv.ctco.zephyr.Config;
-import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.enums.TestStatus;
-import lv.ctco.zephyr.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,36 +15,16 @@ import java.util.concurrent.*;
 
 public class ZephyrUploader {
     private static final Logger log = LoggerFactory.getLogger(ZephyrUploader.class);
-    private static AuthService authService;
+    private final ZephyrConfig zephyrConfig;
     ZephyrService zephyrService;
-    private Config config = new Config();
     Map<String, List<String>> excelData;
 
-    public ZephyrUploader(ZephyrConfig zephyrConfig, AuthService authService, ZephyrService zephyrService) {
-        this.authService = authService;
+    public ZephyrUploader(ZephyrService zephyrService) {
         this.zephyrService = zephyrService;
-
-        setConfig(zephyrConfig);
+        this.zephyrConfig = zephyrService.getZephyrConfig();
     }
 
-    public Config getConfig() {
-        return this.config;
-    }
-
-    public void setConfig(ZephyrConfig zephyrConfig) {
-        config.setValue(ConfigProperty.USERNAME, zephyrConfig.getUsername());
-        config.setValue(ConfigProperty.PASSWORD, zephyrConfig.getPassword());
-        config.setValue(ConfigProperty.JIRA_URL, zephyrConfig.getJiraUrl());
-        config.setValue(ConfigProperty.PROJECT_KEY, zephyrConfig.getProjectKey());
-        config.setValue(ConfigProperty.RELEASE_VERSION, zephyrConfig.getReleaseVersion());
-        config.setValue(ConfigProperty.TEST_CYCLE, zephyrConfig.getTestCycle());
-    }
-
-    public static AuthService getAuthService() {
-        return authService;
-    }
-
-    public void updateJiraZephyr(ZephyrConfig zephyrConfig) throws Exception {
+    public void updateJiraZephyr() throws Exception {
         int poolSize = zephyrConfig.getNoOfThreads();
         boolean recreateFolder = zephyrConfig.isRecreateFolder();
 
@@ -56,9 +33,9 @@ public class ZephyrUploader {
 
         String folderNameWithDatestamp = String.format("%s_%s", folderName, LocalDate.now());
 
-        String projectId = zephyrService.getProjectByKey(config.getValue(ConfigProperty.PROJECT_KEY));
-        String versionId = zephyrService.getVersionForProjectId(config.getValue(ConfigProperty.RELEASE_VERSION), projectId);
-        String cycleId = zephyrService.getCycleId(config.getValue(ConfigProperty.TEST_CYCLE), projectId, versionId);
+        String projectId = zephyrService.getProjectByKey(zephyrConfig.getProjectKey());
+        String versionId = zephyrService.getVersionForProjectId(zephyrConfig.getReleaseVersion(), projectId);
+        String cycleId = zephyrService.getCycleId(zephyrConfig.getTestCycle(), projectId, versionId);
         Integer folderId = zephyrService.getFolderForCycleId(folderNameWithDatestamp, cycleId, projectId, versionId);
 
         if (recreateFolder && folderId != 0) {

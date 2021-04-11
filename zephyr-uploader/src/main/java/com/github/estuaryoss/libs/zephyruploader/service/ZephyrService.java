@@ -7,8 +7,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
-import lv.ctco.zephyr.Config;
-import lv.ctco.zephyr.enums.ConfigProperty;
 import org.apache.http.HttpStatus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,14 +21,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ZephyrService {
     private static final Logger log = LoggerFactory.getLogger(ZephyrService.class);
-    private final Config config;
-    private final int ONE_SECOND = 1000;
+    private final ZephyrConfig zephyrConfig;
 
 
-    public ZephyrService(Config config) {
-        this.config = config;
-        RestAssured.baseURI = config.getValue(ConfigProperty.JIRA_URL);
-        RestAssured.authentication = preemptive().basic(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
+    public ZephyrService(ZephyrConfig zephyrConfig) {
+        this.zephyrConfig = zephyrConfig;
+        RestAssured.baseURI = zephyrConfig.getJiraUrl();
+        RestAssured.authentication = preemptive().basic(zephyrConfig.getUsername(), zephyrConfig.getPassword());
     }
 
     public String getProjectByKey(String projectKey) {
@@ -237,4 +234,7 @@ public class ZephyrService {
         return version;
     }
 
+    public ZephyrConfig getZephyrConfig() {
+        return zephyrConfig;
+    }
 }

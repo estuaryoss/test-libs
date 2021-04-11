@@ -35,16 +35,9 @@ Environment env=new Environment();
         .setReportPath(env.getEnvAndVirtualEnv().get(REPORT_PATH))
         .setNoOfThreads(Integer.parseInt(env.getEnvAndVirtualEnv().get(NO_OF_THREADS)))
         .setRecreateFolder(Boolean.parseBoolean(env.getEnvAndVirtualEnv().get(RECREATE_FOLDER)));
-        Config config=new Config();
-        config.setValue(ConfigProperty.USERNAME,zephyrConfig.getUsername());
-        config.setValue(ConfigProperty.PASSWORD,zephyrConfig.getPassword());
-        config.setValue(ConfigProperty.JIRA_URL,zephyrConfig.getJiraUrl());
-        config.setValue(ConfigProperty.PROJECT_KEY,zephyrConfig.getProjectKey());
-        config.setValue(ConfigProperty.RELEASE_VERSION,zephyrConfig.getReleaseVersion());
-        config.setValue(ConfigProperty.TEST_CYCLE,zephyrConfig.getTestCycle());
 
-        ZephyrUploader zephyrUploader=new ZephyrUploader(zephyrConfig,new AuthService(config),new ZephyrService(config));
-        zephyrUploader.updateJiraZephyr(zephyrConfig);
+        ZephyrUploader zephyrUploader=new ZephyrUploader(new ZephyrService(zephyrConfig));
+        zephyrUploader.updateJiraZephyr();
 ```
 
 ## ! Keep in mind
