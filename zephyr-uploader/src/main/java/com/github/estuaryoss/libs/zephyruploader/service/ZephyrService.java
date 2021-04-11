@@ -34,9 +34,10 @@ public class ZephyrService {
         RequestSpecification request = RestAssured.given().log().uri();
         Response httpResponse = request.get("api/2/project/" + projectKey);
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get project described by projectKey=%s, responseBody=%s", projectKey,
-                        httpResponse.getBody().asString()));
+                        httpResponse.getBody().asString()))
+                .isEqualTo(HTTP_STATUS_OK);
 
         return httpResponse.jsonPath().getString("id");
     }
@@ -45,9 +46,10 @@ public class ZephyrService {
         RequestSpecification request = RestAssured.given().log().uri();
         Response httpResponse = request.get("api/2/issue/" + issueKey);
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get issue described by key =%s, responseBody=%s", issueKey,
-                        httpResponse.getBody().asString()));
+                        httpResponse.getBody().asString()))
+                .isEqualTo(HTTP_STATUS_OK);
 
         return httpResponse.jsonPath().getString("id");
     }
@@ -58,9 +60,10 @@ public class ZephyrService {
                 .queryParam("projectId", projectId);
         Response httpResponse = request.get(String.format("zapi/latest/cycle/%s/folders", cycleId));
         ResponseBody responseBody = httpResponse.getBody();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get folders for cycleId=%s, versionId=%s, projectId=%s, responseBody=%s",
-                        cycleId, versionId, projectId, responseBody.asString()));
+                        cycleId, versionId, projectId, responseBody.asString()))
+                .isEqualTo(HTTP_STATUS_OK);
 
         JSONArray folderInfo = responseBody.as(JSONArray.class);
         int folderId = 0;
@@ -87,9 +90,10 @@ public class ZephyrService {
 
         Response httpResponse = request.get("zapi/latest/cycle");
         ResponseBody responseBody = httpResponse.getBody();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get cycleId for cycleName=%s, versionId=%s, projectId=%s, responseBody=%s",
-                        cycleName, versionId, projectId, responseBody.asString()));
+                        cycleName, versionId, projectId, responseBody.asString()))
+                .isEqualTo(HTTP_STATUS_OK);
 
         String cycleId = "";
         List<Object> elements = Arrays.stream(responseBody.as(JSONObject.class).keySet().toArray())
@@ -114,9 +118,10 @@ public class ZephyrService {
 
         Response httpResponse = request.get(String.format("zapi/latest/cycle/%s/folders", cycleId));
         String responseBody = httpResponse.getBody().asString();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get folders for cycleId=%s, versionId=%s, projectId=%s, responseBody=%s",
-                        cycleId, versionId, projectId, responseBody));
+                        cycleId, versionId, projectId, responseBody))
+                .isEqualTo(HTTP_STATUS_OK);
 
         return responseBody;
     }
@@ -135,9 +140,10 @@ public class ZephyrService {
         ResponseBody responseBody = httpResponse.getBody();
         Integer id = (Integer) responseBody.as(Map.class).get("id");
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to create folder=%s for cycleId=%s, requestBody=%s, responseBody=%s",
-                        folderName, cycleId, jsonBody.toString(), responseBody.asString()));
+                        folderName, cycleId, jsonBody.toString(), responseBody.asString()))
+                .isEqualTo(HTTP_STATUS_OK);
 
         return id;
     }
@@ -151,9 +157,10 @@ public class ZephyrService {
         Response httpResponse = request.delete(String.format("zapi/latest/folder/%s", (int) folderId));
         ResponseBody responseBody = httpResponse.getBody();
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("### Failed to delete folderId=%s for versionId=%s, projectId=%s, cycled=%s, responseBody=%s ###",
-                        folderId, versionId, projectId, cycleId, responseBody));
+                        folderId, versionId, projectId, cycleId, responseBody))
+                .isEqualTo(HTTP_STATUS_OK);
     }
 
     public String createNewExecution(String issueId, ZephyrMetaInfo zephyrDetails, ZephyrConfig zephyrConfig) {
@@ -174,9 +181,10 @@ public class ZephyrService {
         ResponseBody responseBody = httpResponse.getBody();
         String id = (String) responseBody.as(JSONObject.class).keySet().toArray()[0];
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to create new execution for issueId=%s, requestBody=%s, responseBody=%s",
-                        issueId, jsonBody.toString(), responseBody));
+                        issueId, jsonBody.toString(), responseBody))
+                .isEqualTo(HTTP_STATUS_OK);
 
         return id;
     }
@@ -193,9 +201,10 @@ public class ZephyrService {
                 .put(String.format("zapi/latest/execution/%s/execute", executionId));
         ResponseBody responseBody = httpResponse.getBody();
 
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to update execution id=%s, requestBody=%s, responseBody=%s",
-                        executionId, jsonBody.toJSONString(), responseBody));
+                        executionId, jsonBody.toJSONString(), responseBody))
+                .isEqualTo(HTTP_STATUS_OK);
     }
 
     public String getVersionForProjectId(String versionName, String projectId) {
@@ -204,9 +213,10 @@ public class ZephyrService {
 
         Response httpResponse = request.get("zapi/latest/util/versionBoard-list");
         ResponseBody responseBody = httpResponse.getBody();
-        assertThat(httpResponse.getStatusCode()).isEqualTo(HTTP_STATUS_OK)
+        assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get version for versionName=%s and projectId=%s, responseBody=%s",
-                        versionName, projectId, responseBody));
+                        versionName, projectId, responseBody))
+                .isEqualTo(HTTP_STATUS_OK);
 
         log.info("### Got version response=%s " + responseBody.asString());
 
