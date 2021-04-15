@@ -5,7 +5,6 @@ import com.github.estuaryoss.libs.zephyruploader.model.TestStatus;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
-import com.github.estuaryoss.libs.zephyruploader.utils.ExcelReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +23,12 @@ public class ZephyrUploader {
         this.zephyrConfig = zephyrService.getZephyrConfig();
     }
 
-    public void updateJiraZephyr() throws Exception {
+    public void updateJiraZephyr(String[][] rawExcelData) throws Exception {
         int poolSize = zephyrConfig.getNoOfThreads();
         boolean recreateFolder = zephyrConfig.isRecreateFolder();
 
         String folderName = zephyrConfig.getFolderName();
-        excelData = getMapForExecutionDetails(ExcelReader.readExcel(zephyrConfig.getReportPath()));
+        excelData = getMapForExecutionDetails(rawExcelData);
 
         String folderNameWithDatestamp = String.format("%s_%s", folderName, LocalDate.now());
 

@@ -37,7 +37,8 @@ Environment env=new Environment();
         .setRecreateFolder(Boolean.parseBoolean(env.getEnvAndVirtualEnv().get(RECREATE_FOLDER)));
 
         ZephyrUploader zephyrUploader=new ZephyrUploader(new ZephyrService(zephyrConfig));
-        zephyrUploader.updateJiraZephyr();
+        String[][] rawExcelData = ExcelReader.readExcel(zephyrConfig.getReportPath());
+        zephyrUploader.updateJiraZephyr(rawExcelData);
 ```
 
 ## ! Keep in mind
@@ -49,6 +50,7 @@ Environment env=new Environment();
   E.g. -executionStatusColumn=6
 - You also can specify the comments column. For example the link where the test logs are. The default is 8'th column.   
   E.g. -commentsColumn=8
+- Jira Ids are always on the first column in the Excel sheet
 
 ## Precedence
 

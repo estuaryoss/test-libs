@@ -3,6 +3,7 @@ package com.github.estuaryoss.libs.zephyruploader;
 import com.github.estuaryoss.libs.zephyruploader.constants.CliConstants;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
+import com.github.estuaryoss.libs.zephyruploader.utils.ExcelReader;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -43,7 +44,8 @@ public class Main {
         assertZephyrConfigIsSet(zephyrConfig);
 
         ZephyrUploader zephyrUploader = new ZephyrUploader(new ZephyrService(zephyrConfig));
-        zephyrUploader.updateJiraZephyr();
+        String[][] rawExcelData = ExcelReader.readExcel(zephyrConfig.getReportPath());
+        zephyrUploader.updateJiraZephyr(rawExcelData);
 
         System.exit(SUCCESS);
     }

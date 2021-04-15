@@ -11,7 +11,7 @@ public class CliConstants {
     public final static String NO_OF_THREADS = "noOfThreads";
     public final static String RECREATE_FOLDER = "recreateFolder";
     public final static String FOLDER_NAME = "folderName";
-    public final static String ARTIFACT_NAME = "zephyr-uploader";
     public final static String COMMENTS_COLUMN = "commentsColumn";
     public final static String EXECUTION_STATUS_COLUMN = "executionStatusColumn";
+    public final static String ARTIFACT_NAME = "zephyr-uploader";
 }
