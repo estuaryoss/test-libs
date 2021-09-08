@@ -1,18 +1,18 @@
 package com.github.estuaryoss.libs.zephyruploader;
 
-import com.github.estuaryoss.libs.zephyruploader.constants.CliConstants;
+import com.github.estuaryoss.libs.zephyruploader.constants.ZephyrParams;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
 import com.github.estuaryoss.libs.zephyruploader.utils.ExcelReader;
+import com.github.estuaryoss.libs.zephyruploader.utils.ZephyrConfigValidator;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class Main {
-    public static final int ERROR = 1;
-    public static final int SUCCESS = 0;
+    private static final int ERROR = 1;
+    private static final int SUCCESS = 0;
+    private static final String ARTIFACT_NAME = "zephyr-uploader";
 
     public static void main(String[] args) throws Exception {
         Logger rootLogger = Logger.getRootLogger();
@@ -21,27 +21,27 @@ public class Main {
         CliParser cliParser = new CliParser();
         ZephyrConfig zephyrConfig = cliParser.parseCommand(args);
 
-        if (!isCliArgFilled(zephyrConfig)) {
+        if (!isZephyrConfigFilled(zephyrConfig)) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java -cp " +
-                    CliConstants.ARTIFACT_NAME + ".jar Main -" +
-                    CliConstants.USERNAME + String.format(" <%s> -", CliConstants.USERNAME) +
-                    CliConstants.PASSWORD + String.format(" <%s> -", CliConstants.PASSWORD) +
-                    CliConstants.JIRA_URL + String.format(" <%s> -", CliConstants.JIRA_URL) +
-                    CliConstants.PROJECT_KEY + String.format(" <%s> -", CliConstants.PROJECT_KEY) +
-                    CliConstants.RELEASE_VERSION + String.format(" <%s> -", CliConstants.RELEASE_VERSION) +
-                    CliConstants.TEST_CYCLE + String.format(" <%s> -", CliConstants.TEST_CYCLE) +
-                    CliConstants.NO_OF_THREADS + String.format(" <%s> -", CliConstants.NO_OF_THREADS) +
-                    CliConstants.RECREATE_FOLDER + String.format(" <%s> -", CliConstants.RECREATE_FOLDER) +
-                    CliConstants.REPORT_PATH + String.format(" <%s> -", CliConstants.REPORT_PATH) +
-                    CliConstants.EXECUTION_STATUS_COLUMN + String.format(" <%s> -", CliConstants.EXECUTION_STATUS_COLUMN) +
-                    CliConstants.COMMENTS_COLUMN + String.format(" <%s>", CliConstants.COMMENTS_COLUMN), cliParser.getOptions());
-            assertZephyrConfigIsSet(zephyrConfig);
+                    ARTIFACT_NAME + ".jar Main -" +
+                    ZephyrParams.USERNAME.getZephyrParam() + String.format(" <%s> -", ZephyrParams.USERNAME.getZephyrParam()) +
+                    ZephyrParams.PASSWORD.getZephyrParam() + String.format(" <%s> -", ZephyrParams.PASSWORD.getZephyrParam()) +
+                    ZephyrParams.JIRA_URL.getZephyrParam() + String.format(" <%s> -", ZephyrParams.JIRA_URL.getZephyrParam()) +
+                    ZephyrParams.PROJECT_KEY.getZephyrParam() + String.format(" <%s> -", ZephyrParams.PROJECT_KEY.getZephyrParam()) +
+                    ZephyrParams.RELEASE_VERSION.getZephyrParam() + String.format(" <%s> -", ZephyrParams.RELEASE_VERSION.getZephyrParam()) +
+                    ZephyrParams.TEST_CYCLE.getZephyrParam() + String.format(" <%s> -", ZephyrParams.TEST_CYCLE.getZephyrParam()) +
+                    ZephyrParams.NO_OF_THREADS.getZephyrParam() + String.format(" <%s> -", ZephyrParams.NO_OF_THREADS.getZephyrParam()) +
+                    ZephyrParams.RECREATE_FOLDER.getZephyrParam() + String.format(" <%s> -", ZephyrParams.RECREATE_FOLDER.getZephyrParam()) +
+                    ZephyrParams.REPORT_PATH.getZephyrParam() + String.format(" <%s> -", ZephyrParams.REPORT_PATH.getZephyrParam()) +
+                    ZephyrParams.EXECUTION_STATUS_COLUMN.getZephyrParam() + String.format(" <%s> -", ZephyrParams.EXECUTION_STATUS_COLUMN.getZephyrParam()) +
+                    ZephyrParams.COMMENTS_COLUMN.getZephyrParam() + String.format(" <%s>", ZephyrParams.COMMENTS_COLUMN.getZephyrParam()), cliParser.getOptions());
+            ZephyrConfigValidator.validate(zephyrConfig);
 
             System.exit(ERROR);
         }
 
-        assertZephyrConfigIsSet(zephyrConfig);
+        ZephyrConfigValidator.validate(zephyrConfig);
 
         ZephyrUploader zephyrUploader = new ZephyrUploader(new ZephyrService(zephyrConfig));
         String[][] rawExcelData = ExcelReader.readExcel(zephyrConfig.getReportPath());
@@ -50,7 +50,7 @@ public class Main {
         System.exit(SUCCESS);
     }
 
-    private static boolean isCliArgFilled(ZephyrConfig config) {
+    private static boolean isZephyrConfigFilled(ZephyrConfig config) {
         if (config.getJiraUrl() == null || config.getUsername() == null || config.getPassword() == null ||
                 config.getProjectKey() == null || config.getReleaseVersion() == null || config.getTestCycle() == null ||
                 config.getTestCycle() == null) {
@@ -58,29 +58,5 @@ public class Main {
         }
 
         return true;
-    }
-
-    private static void assertZephyrConfigIsSet(ZephyrConfig zephyrConfig) {
-        assertThat(zephyrConfig.getUsername())
-                .withFailMessage(CliConstants.USERNAME + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.USERNAME + "'")
-                .isNotEqualTo(null);
-        assertThat(zephyrConfig.getUsername())
-                .withFailMessage(CliConstants.PASSWORD + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.PASSWORD + "'")
-                .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.JIRA_URL + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.JIRA_URL + "'")
-                .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.PROJECT_KEY + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.PROJECT_KEY + "'")
-                .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.RELEASE_VERSION + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.RELEASE_VERSION + "'")
-                .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.TEST_CYCLE + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.TEST_CYCLE + "'")
-                .isNotEqualTo(null);
-        assertThat(zephyrConfig.getJiraUrl())
-                .withFailMessage(CliConstants.REPORT_PATH + " arg was not set through CLI. Set this argument or set the env var: '" + CliConstants.REPORT_PATH + "'")
-                .isNotEqualTo(null);
     }
 }

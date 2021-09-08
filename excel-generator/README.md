@@ -5,7 +5,7 @@ Test Report generator in Excel library used to support standardized testing.
 ### Call example
 
 ```bash
-java -cp excel-generator-jar-with-dependencies.jar "Main" -infile results.json -outfile testResults.xlsx
+java -cp excel-generator-jar-with-dependencies.jar "com.github.estuaryoss.libs.excelgenerator.Main" -infile results.json -outfile testResults.xlsx
 ```
 
 ## Artifact maven central

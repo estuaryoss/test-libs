@@ -5,7 +5,7 @@ Upload test results in Jira Zephyr library used to support standardized testing.
 ### Call example
 
 ```bash
-java -cp zephyr-uploader.jar "Main" -username auto-robot -password mySecretPasswd123! \
+java -cp zephyr-uploader.jar "com.github.estuaryoss.libs.zephyruploader.Main" -username auto-robot -password mySecretPasswd123! \
 -jiraUrl http://jira.yourcompany.com/rest/ -projectKey AIP -releaseVersion 1.2-UP2020 -testCycle Regression -reportPath Regression_FTP.xls \
 -noOfThreads=10 -folderName Results -recreateFolder false 
 ```
@@ -15,30 +15,60 @@ java -cp zephyr-uploader.jar "Main" -username auto-robot -password mySecretPassw
 ```xml
 
 <dependency>
-  <groupId>com.github.estuaryoss.libs</groupId>
-  <artifactId>zephyr-uploader</artifactId>
-  <version>1.1</version>
+    <groupId>com.github.estuaryoss.libs</groupId>
+    <artifactId>zephyr-uploader</artifactId>
+    <version>1.3</version>
+</dependency>
+
+<dependency>
+<groupId>com.github.estuaryoss.libs</groupId>
+<artifactId>zephyr-uploader</artifactId>
+<version>1.4-SNAPSHOT</version>
 </dependency>
 ```
 
 ## Programmatic example
 
+### Upload from excel report found on disk
+
 ```java
 Environment env=new Environment();
-        ZephyrConfig zephyrConfig=new ZephyrConfig()
-        .setUsername(env.getEnvAndVirtualEnv().get(USERNAME))
-        .setPassword(env.getEnvAndVirtualEnv().get(PASSWORD))
-        .setJiraUrl(env.getEnvAndVirtualEnv().get(JIRA_URL))
-        .setProjectKey(env.getEnvAndVirtualEnv().get(PROJECT_KEY))
-        .setReleaseVersion(env.getEnvAndVirtualEnv().get(RELEASE_VERSION))
-        .setTestCycle(env.getEnvAndVirtualEnv().get(TEST_CYCLE))
-        .setReportPath(env.getEnvAndVirtualEnv().get(REPORT_PATH))
-        .setNoOfThreads(Integer.parseInt(env.getEnvAndVirtualEnv().get(NO_OF_THREADS)))
-        .setRecreateFolder(Boolean.parseBoolean(env.getEnvAndVirtualEnv().get(RECREATE_FOLDER)));
+        ZephyrConfig zephyrConfig=ZephyrConfig.builder()
+        .username(env.getEnvAndVirtualEnv().get(ZephyrParams.USERNAME.getZephyrParam()))
+        .password(env.getEnvAndVirtualEnv().get(ZephyrParams.PASSWORD.getZephyrParam()))
+        .jiraUrl(env.getEnvAndVirtualEnv().get(ZephyrParams.JIRA_URL.getZephyrParam()))
+        .projectKey(env.getEnvAndVirtualEnv().get(ZephyrParams.PROJECT_KEY.getZephyrParam()))
+        .releaseVersion(env.getEnvAndVirtualEnv().get(ZephyrParams.RELEASE_VERSION.getZephyrParam()))
+        .testCycle(env.getEnvAndVirtualEnv().get(ZephyrParams.TEST_CYCLE.getZephyrParam()))
+        .reportPath(env.getEnvAndVirtualEnv().get(ZephyrParams.REPORT_PATH.getZephyrParam()))
+        .noOfThreads(Integer.parseInt(env.getEnvAndVirtualEnv().get(ZephyrParams.NO_OF_THREADS.getZephyrParam())))
+        .recreateFolder(Boolean.parseBoolean(env.getEnvAndVirtualEnv().get(ZephyrParams.RECREATE_FOLDER.getZephyrParam())));
+        .build();
 
         ZephyrUploader zephyrUploader=new ZephyrUploader(new ZephyrService(zephyrConfig));
-        String[][] rawExcelData = ExcelReader.readExcel(zephyrConfig.getReportPath());
+        String[][]rawExcelData=ExcelReader.readExcel(zephyrConfig.getReportPath());
         zephyrUploader.updateJiraZephyr(rawExcelData);
+```
+
+### Upload from json object (Array of objects)
+
+```java
+Environment env=new Environment();
+        ZephyrConfig zephyrConfig=ZephyrConfig.builder()
+        .username(env.getEnvAndVirtualEnv().get(ZephyrParams.USERNAME.getZephyrParam()))
+        .password(env.getEnvAndVirtualEnv().get(ZephyrParams.PASSWORD.getZephyrParam()))
+        .jiraUrl(env.getEnvAndVirtualEnv().get(ZephyrParams.JIRA_URL.getZephyrParam()))
+        .projectKey(env.getEnvAndVirtualEnv().get(ZephyrParams.PROJECT_KEY.getZephyrParam()))
+        .releaseVersion(env.getEnvAndVirtualEnv().get(ZephyrParams.RELEASE_VERSION.getZephyrParam()))
+        .testCycle(env.getEnvAndVirtualEnv().get(ZephyrParams.TEST_CYCLE.getZephyrParam()))
+        .reportPath(env.getEnvAndVirtualEnv().get(ZephyrParams.REPORT_PATH.getZephyrParam()))
+        .noOfThreads(Integer.parseInt(env.getEnvAndVirtualEnv().get(ZephyrParams.NO_OF_THREADS.getZephyrParam())))
+        .recreateFolder(Boolean.parseBoolean(env.getEnvAndVirtualEnv().get(ZephyrParams.RECREATE_FOLDER.getZephyrParam())));
+        .build();
+
+        ZephyrUploader zephyrUploader=new ZephyrUploader(new ZephyrService(zephyrConfig));
+        List<LinkedHashMap<String, String>> testResults=...; //read from disk and deserialize with Jackson, or get from Rest API
+        zephyrUploader.updateJiraZephyr(testResults);
 ```
 
 ## ! Keep in mind
