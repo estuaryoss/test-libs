@@ -1,6 +1,6 @@
 package com.github.estuaryoss.libs.zephyruploader.utils;
 
-import com.github.estuaryoss.libs.zephyruploader.constants.CliConstants;
+import com.github.estuaryoss.libs.zephyruploader.constants.ZephyrParams;
 import com.github.estuaryoss.libs.zephyruploader.env.Environment;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 
@@ -11,44 +11,44 @@ public class EnvLoader {
     public static ZephyrConfig getZephyrConfigFromEnv() {
         ZephyrConfig zephyrConfig = new ZephyrConfig();
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.USERNAME) != null) {
-            zephyrConfig.setUsername(env.getEnvAndVirtualEnv().get(CliConstants.USERNAME));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.USERNAME.getZephyrParam()) != null) {
+            zephyrConfig.setUsername(env.getEnvAndVirtualEnv().get(ZephyrParams.USERNAME.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.PASSWORD) != null) {
-            zephyrConfig.setPassword(env.getEnvAndVirtualEnv().get(CliConstants.PASSWORD));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.PASSWORD.getZephyrParam()) != null) {
+            zephyrConfig.setPassword(env.getEnvAndVirtualEnv().get(ZephyrParams.PASSWORD.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.JIRA_URL) != null) {
-            zephyrConfig.setJiraUrl(env.getEnvAndVirtualEnv().get(CliConstants.JIRA_URL));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.JIRA_URL.getZephyrParam()) != null) {
+            zephyrConfig.setJiraUrl(env.getEnvAndVirtualEnv().get(ZephyrParams.JIRA_URL.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.PROJECT_KEY) != null) {
-            zephyrConfig.setProjectKey(env.getEnvAndVirtualEnv().get(CliConstants.PROJECT_KEY));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.PROJECT_KEY.getZephyrParam()) != null) {
+            zephyrConfig.setProjectKey(env.getEnvAndVirtualEnv().get(ZephyrParams.PROJECT_KEY.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.RELEASE_VERSION) != null) {
-            zephyrConfig.setReleaseVersion(env.getEnvAndVirtualEnv().get(CliConstants.RELEASE_VERSION));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.RELEASE_VERSION.getZephyrParam()) != null) {
+            zephyrConfig.setReleaseVersion(env.getEnvAndVirtualEnv().get(ZephyrParams.RELEASE_VERSION.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.TEST_CYCLE) != null) {
-            zephyrConfig.setTestCycle(env.getEnvAndVirtualEnv().get(CliConstants.TEST_CYCLE));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.TEST_CYCLE.getZephyrParam()) != null) {
+            zephyrConfig.setTestCycle(env.getEnvAndVirtualEnv().get(ZephyrParams.TEST_CYCLE.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.REPORT_PATH) != null) {
-            zephyrConfig.setReportPath(env.getEnvAndVirtualEnv().get(CliConstants.REPORT_PATH));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.REPORT_PATH.getZephyrParam()) != null) {
+            zephyrConfig.setReportPath(env.getEnvAndVirtualEnv().get(ZephyrParams.REPORT_PATH.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.FOLDER_NAME) != null) {
-            zephyrConfig.setFolderName(env.getEnvAndVirtualEnv().get(CliConstants.FOLDER_NAME));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.FOLDER_NAME.getZephyrParam()) != null) {
+            zephyrConfig.setFolderName(env.getEnvAndVirtualEnv().get(ZephyrParams.FOLDER_NAME.getZephyrParam()));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.NO_OF_THREADS) != null) {
-            zephyrConfig.setNoOfThreads(Integer.parseInt(env.getEnvAndVirtualEnv().get(CliConstants.NO_OF_THREADS)));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.NO_OF_THREADS.getZephyrParam()) != null) {
+            zephyrConfig.setNoOfThreads(Integer.parseInt(env.getEnvAndVirtualEnv().get(ZephyrParams.NO_OF_THREADS.getZephyrParam())));
         }
 
-        if (env.getEnvAndVirtualEnv().get(CliConstants.RECREATE_FOLDER) != null) {
-            zephyrConfig.setRecreateFolder(Boolean.parseBoolean(env.getEnvAndVirtualEnv().get(CliConstants.RECREATE_FOLDER)));
+        if (env.getEnvAndVirtualEnv().get(ZephyrParams.RECREATE_FOLDER.getZephyrParam()) != null) {
+            zephyrConfig.setRecreateFolder(Boolean.parseBoolean(env.getEnvAndVirtualEnv().get(ZephyrParams.RECREATE_FOLDER.getZephyrParam())));
         }
 
         return zephyrConfig;

@@ -16,19 +16,44 @@ public class ZephyrUploader {
     private static final Logger log = LoggerFactory.getLogger(ZephyrUploader.class);
     private final ZephyrConfig zephyrConfig;
     ZephyrService zephyrService;
-    Map<String, List<String>> excelData;
+    Map<String, List<String>> testData;
 
     public ZephyrUploader(ZephyrService zephyrService) {
         this.zephyrService = zephyrService;
         this.zephyrConfig = zephyrService.getZephyrConfig();
     }
 
-    public void updateJiraZephyr(String[][] rawExcelData) throws Exception {
+
+    /**
+     * Data input from a list of objects
+     *
+     * @param testResults
+     * @throws InterruptedException
+     */
+    public void updateJiraZephyr(List<LinkedHashMap<String, String>> testResults) throws InterruptedException {
+        testData = getMapForExecutionDetails(testResults);
+
+        uploadResultsToJira();
+    }
+
+
+    /**
+     * Data input from Excel file as String[][]
+     *
+     * @param testResults
+     * @throws InterruptedException
+     */
+    public void updateJiraZephyr(String[][] testResults) throws InterruptedException {
+        testData = getMapForExecutionDetails(testResults);
+
+        uploadResultsToJira();
+    }
+
+    private void uploadResultsToJira() throws InterruptedException {
         int poolSize = zephyrConfig.getNoOfThreads();
         boolean recreateFolder = zephyrConfig.isRecreateFolder();
 
         String folderName = zephyrConfig.getFolderName();
-        excelData = getMapForExecutionDetails(rawExcelData);
 
         String folderNameWithDatestamp = String.format("%s_%s", folderName, LocalDate.now());
 
@@ -84,10 +109,19 @@ public class ZephyrUploader {
         return mapWithExecutionDetails;
     }
 
+    private Map<String, List<String>> getMapForExecutionDetails(List<LinkedHashMap<String, String>> testResults) {
+        Map<String, List<String>> mapWithExecutionDetails = new LinkedHashMap<>();
+        testResults.forEach(elem -> {
+            List<String> row = new ArrayList<>(elem.values());
+            mapWithExecutionDetails.put(row.get(0), row);
+        });
+
+        return mapWithExecutionDetails;
+    }
 
     private List<Callable> getZephyrExecutionsList(ZephyrMetaInfo zephyrMetaInfo, ZephyrConfig zephyrConfig) {
         List<Callable> threadList = new ArrayList<>();
-        for (String key : excelData.keySet()) {
+        for (String key : testData.keySet()) {
             Callable callable = () -> {
                 try {
                     createAndUpdateZephyrExecution(zephyrMetaInfo, zephyrConfig, key);
@@ -111,15 +145,15 @@ public class ZephyrUploader {
         String executionId = zephyrService.createNewExecution(issueId, zephyrDetails, zephyrCfg);
         log.info(String.format("created new executionId=%s", executionId));
 
-        if (excelData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.SUCCESS.getStatus())) {
+        if (testData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.SUCCESS.getStatus())) {
             zephyrService.updateExecutionId(executionId,
-                    TestStatus.PASSED.getId(), excelData.get(key).get(zephyrCfg.getCommentsColumn()));
-        } else if (excelData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.FAILURE.getStatus())) {
+                    TestStatus.PASSED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
+        } else if (testData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.FAILURE.getStatus())) {
             zephyrService.updateExecutionId(executionId,
-                    TestStatus.FAILED.getId(), excelData.get(key).get(zephyrCfg.getCommentsColumn()));
+                    TestStatus.FAILED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
         } else {
             zephyrService.updateExecutionId(executionId,
-                    TestStatus.NOT_EXECUTED.getId(), excelData.get(key).get(zephyrCfg.getCommentsColumn()));
+                    TestStatus.NOT_EXECUTED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
         }
     }
 

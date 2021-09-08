@@ -5,7 +5,7 @@ Fluentd logging library used to support standardized testing.
 ### Call example
 
 ```bash
-java -cp target/fluentd-logger-1.0-SNAPSHOT-jar-with-dependencies.jar "Main" -tag tag -file testResults.json -fluentd 127.0.0.1:24224
+java -cp target/fluentd-logger-1.0-SNAPSHOT-jar-with-dependencies.jar "com.github.estuaryoss.libs.fluentdlogger.Main" -tag tag -file testResults.json -fluentd 127.0.0.1:24224
 ```
 
 ## Artifact maven central
