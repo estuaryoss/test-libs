@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ZephyrService {
     private static final Logger log = LoggerFactory.getLogger(ZephyrService.class);
     private final int HTTP_STATUS_OK = 200;
-    private final ZephyrConfig zephyrConfig;
+    private ZephyrConfig zephyrConfig;
 
 
     public ZephyrService(ZephyrConfig zephyrConfig) {
@@ -246,5 +246,9 @@ public class ZephyrService {
 
     public ZephyrConfig getZephyrConfig() {
         return zephyrConfig;
+    }
+
+    public void setZephyrConfig(ZephyrConfig zephyrConfig) {
+        this.zephyrConfig = zephyrConfig;
     }
 }
