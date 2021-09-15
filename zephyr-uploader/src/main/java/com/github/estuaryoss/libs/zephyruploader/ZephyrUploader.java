@@ -14,13 +14,11 @@ import java.util.concurrent.*;
 
 public class ZephyrUploader {
     private static final Logger log = LoggerFactory.getLogger(ZephyrUploader.class);
-    private final ZephyrConfig zephyrConfig;
     ZephyrService zephyrService;
     Map<String, List<String>> testData;
 
     public ZephyrUploader(ZephyrService zephyrService) {
         this.zephyrService = zephyrService;
-        this.zephyrConfig = zephyrService.getZephyrConfig();
     }
 
 
@@ -50,16 +48,16 @@ public class ZephyrUploader {
     }
 
     private void uploadResultsToJira() throws InterruptedException {
-        int poolSize = zephyrConfig.getNoOfThreads();
-        boolean recreateFolder = zephyrConfig.isRecreateFolder();
+        int poolSize = this.zephyrService.getZephyrConfig().getNoOfThreads();
+        boolean recreateFolder = this.zephyrService.getZephyrConfig().isRecreateFolder();
 
-        String folderName = zephyrConfig.getFolderName();
+        String folderName = this.zephyrService.getZephyrConfig().getFolderName();
 
         String folderNameWithDatestamp = String.format("%s_%s", folderName, LocalDate.now());
 
-        String projectId = zephyrService.getProjectByKey(zephyrConfig.getProjectKey());
-        String versionId = zephyrService.getVersionForProjectId(zephyrConfig.getReleaseVersion(), projectId);
-        String cycleId = zephyrService.getCycleId(zephyrConfig.getTestCycle(), projectId, versionId);
+        String projectId = zephyrService.getProjectByKey(this.zephyrService.getZephyrConfig().getProjectKey());
+        String versionId = zephyrService.getVersionForProjectId(this.zephyrService.getZephyrConfig().getReleaseVersion(), projectId);
+        String cycleId = zephyrService.getCycleId(this.zephyrService.getZephyrConfig().getTestCycle(), projectId, versionId);
         Integer folderId = zephyrService.getFolderForCycleId(folderNameWithDatestamp, cycleId, projectId, versionId);
 
         if (recreateFolder && folderId != 0) {
@@ -84,7 +82,7 @@ public class ZephyrUploader {
         BlockingQueue jobQueue = new LinkedBlockingQueue<Runnable>();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS, jobQueue);
 
-        List<Callable> zephyrExecutions = getZephyrExecutionsList(zephyrMetaInfo, zephyrConfig);
+        List<Callable> zephyrExecutions = getZephyrExecutionsList(zephyrMetaInfo, this.zephyrService.getZephyrConfig());
 
         log.info("Executing with a maximum thread pool of: " + poolSize);
 
