@@ -1,6 +1,6 @@
 package com.github.estuaryoss.libs.zephyruploader.service;
 
-import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
+import com.github.estuaryoss.libs.zephyruploader.component.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -11,6 +11,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,12 +20,13 @@ import java.util.stream.Collectors;
 import static io.restassured.RestAssured.preemptive;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Service
 public class ZephyrService {
     private static final Logger log = LoggerFactory.getLogger(ZephyrService.class);
     private final int HTTP_STATUS_OK = 200;
     private ZephyrConfig zephyrConfig;
 
-
+    @Autowired
     public ZephyrService(ZephyrConfig zephyrConfig) {
         this.zephyrConfig = zephyrConfig;
         RestAssured.baseURI = zephyrConfig.getJiraUrl();

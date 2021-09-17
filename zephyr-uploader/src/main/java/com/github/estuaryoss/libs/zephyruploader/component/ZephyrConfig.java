@@ -1,14 +1,16 @@
-package com.github.estuaryoss.libs.zephyruploader.model;
+package com.github.estuaryoss.libs.zephyruploader.component;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Component
 public class ZephyrConfig {
     private String username;
     private String password;
