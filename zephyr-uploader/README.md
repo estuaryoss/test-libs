@@ -31,6 +31,8 @@ java -cp zephyr-uploader.jar "com.github.estuaryoss.libs.zephyruploader.Main" -u
 
 ### Upload from excel report found on disk
 
+Using classic approach:
+
 ```java
 Environment env=new Environment();
         ZephyrConfig zephyrConfig=ZephyrConfig.builder()
@@ -50,6 +52,19 @@ Environment env=new Environment();
         zephyrUploader.updateJiraZephyr(rawExcelData);
 ```
 
+Using spring context
+
+```java
+ZephyrConfig zephyrConfig=...;
+
+
+        ApplicationContext context=new AnnotationConfigApplicationContext(ApplicationConfig.class);
+
+        ZephyrService zephyrService=context.getBean(ZephyrService.class);
+        zephyrService.setZephyrConfig(zephyrConfig);
+        ZephyrUploader zephyrUploader=context.getBean(ZephyrUploader.class);
+```
+
 ### Upload from json object (Array of objects)
 
 ```java
@@ -67,7 +82,7 @@ Environment env=new Environment();
         .build();
 
         ZephyrUploader zephyrUploader=new ZephyrUploader(new ZephyrService(zephyrConfig));
-        List<LinkedHashMap<String, String>> testResults=...; //read from disk and deserialize with Jackson, or get from Rest API
+        List<LinkedHashMap<String, String>>testResults=...; //read from disk and deserialize with Jackson, or get from Rest API
         zephyrUploader.updateJiraZephyr(testResults);
 ```
 

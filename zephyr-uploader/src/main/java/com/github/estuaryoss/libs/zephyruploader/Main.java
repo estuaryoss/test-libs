@@ -1,13 +1,17 @@
 package com.github.estuaryoss.libs.zephyruploader;
 
+import com.github.estuaryoss.libs.zephyruploader.component.ZephyrConfig;
+import com.github.estuaryoss.libs.zephyruploader.component.ZephyrUploader;
+import com.github.estuaryoss.libs.zephyruploader.config.ApplicationConfig;
 import com.github.estuaryoss.libs.zephyruploader.constants.ZephyrParams;
-import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
 import com.github.estuaryoss.libs.zephyruploader.utils.ExcelReader;
 import com.github.estuaryoss.libs.zephyruploader.utils.ZephyrConfigValidator;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Main {
     private static final int ERROR = 1;
@@ -17,6 +21,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Logger rootLogger = Logger.getRootLogger();
         rootLogger.setLevel(Level.INFO);
+
+        ApplicationContext context = new AnnotationConfigApplicationContext(ApplicationConfig.class);
 
         CliParser cliParser = new CliParser();
         ZephyrConfig zephyrConfig = cliParser.parseCommand(args);
@@ -41,9 +47,14 @@ public class Main {
             System.exit(ERROR);
         }
 
+
         ZephyrConfigValidator.validate(zephyrConfig);
 
-        ZephyrUploader zephyrUploader = new ZephyrUploader(new ZephyrService(zephyrConfig));
+        ZephyrService zephyrService = context.getBean(ZephyrService.class);
+        zephyrService.setZephyrConfig(zephyrConfig);
+
+        ZephyrUploader zephyrUploader = context.getBean(ZephyrUploader.class);
+
         String[][] rawExcelData = ExcelReader.readExcel(zephyrConfig.getReportPath());
         zephyrUploader.updateJiraZephyr(rawExcelData);
 

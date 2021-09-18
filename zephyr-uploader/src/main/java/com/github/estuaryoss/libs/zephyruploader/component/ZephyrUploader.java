@@ -1,19 +1,22 @@
-package com.github.estuaryoss.libs.zephyruploader;
+package com.github.estuaryoss.libs.zephyruploader.component;
 
 import com.github.estuaryoss.libs.zephyruploader.model.TestExecutionStatus;
 import com.github.estuaryoss.libs.zephyruploader.model.TestStatus;
-import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
 
+@Component
 public class ZephyrUploader {
     private static final Logger log = LoggerFactory.getLogger(ZephyrUploader.class);
+    @Autowired
     ZephyrService zephyrService;
     Map<String, List<String>> testData;
 

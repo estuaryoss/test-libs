@@ -1,8 +1,8 @@
 package com.github.estuaryoss.libs.zephyruploader.utils;
 
+import com.github.estuaryoss.libs.zephyruploader.component.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.constants.ZephyrParams;
 import com.github.estuaryoss.libs.zephyruploader.env.Environment;
-import com.github.estuaryoss.libs.zephyruploader.model.ZephyrConfig;
 
 
 public class EnvLoader {
