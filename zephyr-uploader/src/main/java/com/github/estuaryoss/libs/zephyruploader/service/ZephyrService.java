@@ -35,7 +35,7 @@ public class ZephyrService {
 
     public String getProjectByKey(String projectKey) {
         RequestSpecification request = RestAssured.given().log().uri();
-        Response httpResponse = request.get("api/2/project/" + projectKey);
+        Response httpResponse = request.get("/rest/api/2/project/" + projectKey);
 
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get project described by projectKey=%s, responseBody=%s", projectKey,
@@ -47,7 +47,7 @@ public class ZephyrService {
 
     public String getIssueByKey(String issueKey) {
         RequestSpecification request = RestAssured.given().log().uri();
-        Response httpResponse = request.get("api/2/issue/" + issueKey);
+        Response httpResponse = request.get("/rest/api/2/issue/" + issueKey);
 
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get issue described by key =%s, responseBody=%s", issueKey,
@@ -61,7 +61,7 @@ public class ZephyrService {
         RequestSpecification request = RestAssured.given().log().uri()
                 .queryParam("versionId", versionId)
                 .queryParam("projectId", projectId);
-        Response httpResponse = request.get(String.format("zapi/latest/cycle/%s/folders", cycleId));
+        Response httpResponse = request.get(String.format("/rest/zapi/latest/cycle/%s/folders", cycleId));
         ResponseBody responseBody = httpResponse.getBody();
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get folders for cycleId=%s, versionId=%s, projectId=%s, responseBody=%s",
@@ -91,7 +91,7 @@ public class ZephyrService {
                 .queryParam("versionId", versionId)
                 .queryParam("projectId", projectId);
 
-        Response httpResponse = request.get("zapi/latest/cycle");
+        Response httpResponse = request.get("/rest/zapi/latest/cycle");
         ResponseBody responseBody = httpResponse.getBody();
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get cycleId for cycleName=%s, versionId=%s, projectId=%s, responseBody=%s",
@@ -119,7 +119,7 @@ public class ZephyrService {
                 .queryParam("versionId", versionId)
                 .queryParam("projectId", projectId);
 
-        Response httpResponse = request.get(String.format("zapi/latest/cycle/%s/folders", cycleId));
+        Response httpResponse = request.get(String.format("/rest/zapi/latest/cycle/%s/folders", cycleId));
         String responseBody = httpResponse.getBody().asString();
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get folders for cycleId=%s, versionId=%s, projectId=%s, responseBody=%s",
@@ -138,7 +138,7 @@ public class ZephyrService {
         RequestSpecification request = RestAssured.given().log().uri();
         Response httpResponse = request
                 .header("Content-Type", ContentType.JSON)
-                .body(jsonBody).post("zapi/latest/folder/create");
+                .body(jsonBody).post("/rest/zapi/latest/folder/create");
 
         ResponseBody responseBody = httpResponse.getBody();
         Integer id = (Integer) responseBody.as(Map.class).get("id");
@@ -157,7 +157,7 @@ public class ZephyrService {
                 .queryParam("projectId", projectId)
                 .queryParam("cycleId", cycleId);
 
-        Response httpResponse = request.delete(String.format("zapi/latest/folder/%s", (int) folderId));
+        Response httpResponse = request.delete(String.format("/rest/zapi/latest/folder/%s", (int) folderId));
         ResponseBody responseBody = httpResponse.getBody();
 
         assertThat(httpResponse.getStatusCode())
@@ -180,7 +180,7 @@ public class ZephyrService {
         Response httpResponse = request
                 .header("Content-Type", ContentType.JSON)
                 .body(jsonBody)
-                .post("zapi/latest/execution");
+                .post("/rest/zapi/latest/execution");
         ResponseBody responseBody = httpResponse.getBody();
         String id = (String) responseBody.as(JSONObject.class).keySet().toArray()[0];
 
@@ -201,7 +201,7 @@ public class ZephyrService {
         Response httpResponse = request
                 .header("Content-Type", ContentType.JSON)
                 .body(jsonBody)
-                .put(String.format("zapi/latest/execution/%s/execute", executionId));
+                .put(String.format("/rest/zapi/latest/execution/%s/execute", executionId));
         ResponseBody responseBody = httpResponse.getBody();
 
         assertThat(httpResponse.getStatusCode())
@@ -214,7 +214,7 @@ public class ZephyrService {
         RequestSpecification request = RestAssured.given().log().uri()
                 .queryParam("projectId", projectId);
 
-        Response httpResponse = request.get("zapi/latest/util/versionBoard-list");
+        Response httpResponse = request.get("/rest/zapi/latest/util/versionBoard-list");
         ResponseBody responseBody = httpResponse.getBody();
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to get version for versionName=%s and projectId=%s, responseBody=%s",
