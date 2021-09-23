@@ -6,7 +6,7 @@ Upload test results in Jira Zephyr library used to support standardized testing.
 
 ```bash
 java -cp zephyr-uploader.jar "com.github.estuaryoss.libs.zephyruploader.Main" -username auto-robot -password mySecretPasswd123! \
--jiraUrl http://jira.yourcompany.com/rest/ -projectKey AIP -releaseVersion 1.2-UP2020 -testCycle Regression -reportPath Regression_FTP.xls \
+-jiraUrl http://jira.yourcompany.com -projectKey AIP -releaseVersion 1.2-UP2020 -testCycle Regression -reportPath Regression_FTP.xls \
 -noOfThreads=10 -folderName Results -recreateFolder false 
 ```
 
