@@ -4,6 +4,7 @@ import com.github.estuaryoss.libs.zephyruploader.model.TestExecutionStatus;
 import com.github.estuaryoss.libs.zephyruploader.model.TestStatus;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,20 +87,25 @@ public class ZephyrUploader {
         ThreadPoolExecutor executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS, jobQueue);
 
         List<Callable> zephyrExecutions = getZephyrExecutionsList(zephyrMetaInfo, this.zephyrService.getZephyrConfig());
+        List<Future<Void>> zephyrExecutionsList = new ArrayList<>();
 
         log.info("Executing with a maximum thread pool of: " + poolSize);
 
         zephyrExecutions.forEach(zephyrExecution -> {
-            executor.submit(zephyrExecution);
+            Future<Void> execution = executor.submit(zephyrExecution);
+            zephyrExecutionsList.add(execution);
         });
 
-        while (executor.getActiveCount() > 0 && jobQueue.size() > 0) {
-            //wait to complete
-            Thread.sleep(1000);
-        }
+        zephyrExecutionsList.forEach(execution -> {
+            try {
+                execution.get();
+            } catch (ExecutionException e) {
+                log.debug(ExceptionUtils.getStackTrace(e));
+            } catch (InterruptedException e) {
+                log.debug(ExceptionUtils.getStackTrace(e));
+            }
+        });
 
-        //wait for others to finish also
-        Thread.sleep(5000);
         executor.shutdown();
     }
 
