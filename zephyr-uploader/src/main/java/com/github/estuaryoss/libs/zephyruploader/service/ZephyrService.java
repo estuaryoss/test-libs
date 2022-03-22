@@ -4,13 +4,18 @@ import com.github.estuaryoss.libs.zephyruploader.component.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.config.HttpClientConfig;
+import io.restassured.config.HttpClientConfig.HttpClientFactory;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,10 +38,13 @@ public class ZephyrService {
         this.zephyrConfig = zephyrConfig;
         this.requestSpecification = new RequestSpecBuilder()
                 .setBaseUri(zephyrConfig.getJiraUrl())
+                .setConfig(RestAssuredConfig
+                        .config()
+                        .httpClient(HttpClientConfig.httpClientConfig().httpClientFactory(getHttpClientConfigWithRetry())))
                 .setRelaxedHTTPSValidation()
                 .setAuth(preemptive().basic(zephyrConfig.getUsername(), zephyrConfig.getPassword()))
 //                .addFilter(new RequestLoggingFilter())
-                .addFilter(new ResponseLoggingFilter())
+//                .addFilter(new ResponseLoggingFilter())
                 .build();
     }
 
@@ -197,7 +205,7 @@ public class ZephyrService {
                 .isEqualTo(HttpStatus.SC_OK);
     }
 
-    public String createNewExecution(String issueId, ZephyrMetaInfo zephyrDetails, ZephyrConfig zephyrConfig) {
+    public int createNewExecution(String issueId, ZephyrMetaInfo zephyrDetails, ZephyrConfig zephyrConfig) {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("cycleId", zephyrDetails.getCycleId());
         jsonBody.put("projectId", zephyrDetails.getProjectId());
@@ -217,7 +225,7 @@ public class ZephyrService {
 
         ResponseBody responseBody = httpResponse.getBody();
 
-        String id = (String) responseBody.as(Map.class).keySet().toArray()[0];
+        int id = responseBody.jsonPath().getInt("id");
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to create new execution for issueId=%s, requestBody=%s, responseBody=%s",
                         issueId, jsonBody, responseBody))
@@ -226,7 +234,7 @@ public class ZephyrService {
         return id;
     }
 
-    public void updateExecutionId(String executionId, int status, String comment) {
+    public int updateExecutionId(int executionId, int status, String comment) {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("status", status);
         jsonBody.put("comment", comment);
@@ -245,6 +253,8 @@ public class ZephyrService {
                 .withFailMessage(String.format("Failed to update execution id=%s, requestBody=%s, responseBody=%s",
                         executionId, jsonBody.toJSONString(), responseBody))
                 .isEqualTo(HttpStatus.SC_OK);
+
+        return responseBody.jsonPath().getInt("id");
     }
 
     public String getVersionForProjectId(String versionName, String projectId) {
@@ -296,5 +306,14 @@ public class ZephyrService {
         }
 
         return version;
+    }
+
+    private HttpClientFactory getHttpClientConfigWithRetry() {
+        return () -> {
+            HttpClient httpClient = HttpClientBuilder.create()
+                    .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
+                    .build();
+            return httpClient;
+        };
     }
 }

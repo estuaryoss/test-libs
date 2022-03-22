@@ -4,9 +4,8 @@ import com.github.estuaryoss.libs.zephyruploader.model.TestExecutionStatus;
 import com.github.estuaryoss.libs.zephyruploader.model.TestStatus;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import com.github.estuaryoss.libs.zephyruploader.service.ZephyrService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,12 +14,12 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Component
+@Slf4j
 public class ZephyrUploader {
-    private static final Logger log = LoggerFactory.getLogger(ZephyrUploader.class);
-    @Autowired
     ZephyrService zephyrService;
     Map<String, List<String>> testData;
 
+    @Autowired
     public ZephyrUploader(ZephyrService zephyrService) {
         this.zephyrService = zephyrService;
     }
@@ -30,12 +29,13 @@ public class ZephyrUploader {
      * Data input from a list of objects
      *
      * @param testResults
+     * @return A list of executions
      * @throws InterruptedException
      */
-    public void updateJiraZephyr(List<LinkedHashMap<String, String>> testResults) throws InterruptedException {
+    public List<Integer> updateJiraZephyr(List<LinkedHashMap<String, String>> testResults) throws InterruptedException {
         testData = getMapForExecutionDetails(testResults);
 
-        uploadResultsToJira();
+        return uploadResultsToJira();
     }
 
 
@@ -45,13 +45,15 @@ public class ZephyrUploader {
      * @param testResults
      * @throws InterruptedException
      */
-    public void updateJiraZephyr(String[][] testResults) throws InterruptedException {
+    public List<Integer> updateJiraZephyr(String[][] testResults) throws InterruptedException {
         testData = getMapForExecutionDetails(testResults);
 
-        uploadResultsToJira();
+        return uploadResultsToJira();
     }
 
-    private void uploadResultsToJira() throws InterruptedException {
+    private List<Integer> uploadResultsToJira() throws InterruptedException {
+        List<Integer> executionIds = new ArrayList<>();
+
         int poolSize = this.zephyrService.getZephyrConfig().getNoOfThreads();
         boolean recreateFolder = this.zephyrService.getZephyrConfig().isRecreateFolder();
 
@@ -87,18 +89,18 @@ public class ZephyrUploader {
         ThreadPoolExecutor executor = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS, jobQueue);
 
         List<Callable> zephyrExecutions = getZephyrExecutionsList(zephyrMetaInfo, this.zephyrService.getZephyrConfig());
-        List<Future<Void>> zephyrExecutionsList = new ArrayList<>();
+        List<Future<Integer>> zephyrExecutionsList = new ArrayList<>();
 
         log.info("Executing with a maximum thread pool of: " + poolSize);
 
         zephyrExecutions.forEach(zephyrExecution -> {
-            Future<Void> execution = executor.submit(zephyrExecution);
+            Future<Integer> execution = executor.submit(zephyrExecution);
             zephyrExecutionsList.add(execution);
         });
 
         zephyrExecutionsList.forEach(execution -> {
             try {
-                execution.get();
+                executionIds.add(execution.get());
             } catch (ExecutionException e) {
                 log.debug(ExceptionUtils.getStackTrace(e));
             } catch (InterruptedException e) {
@@ -107,6 +109,8 @@ public class ZephyrUploader {
         });
 
         executor.shutdown();
+
+        return executionIds;
     }
 
     private Map<String, List<String>> getMapForExecutionDetails(String[][] excelData) {
@@ -130,13 +134,15 @@ public class ZephyrUploader {
         List<Callable> threadList = new ArrayList<>();
         for (String key : testData.keySet()) {
             Callable callable = () -> {
+                int executionId = -1;
                 try {
-                    createAndUpdateZephyrExecution(zephyrMetaInfo, zephyrConfig, key);
+                    executionId = createAndUpdateZephyrExecution(zephyrMetaInfo, zephyrConfig, key);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(String.format("Failed to create/update test execution for key=%s\n", key) +
+                            ExceptionUtils.getStackTrace(e));
                 }
 
-                return null;
+                return executionId;
             };
             threadList.add(callable);
             log.info(String.format("### Thread %s added to the list ###", key));
@@ -144,24 +150,43 @@ public class ZephyrUploader {
         return threadList;
     }
 
-    private void createAndUpdateZephyrExecution(ZephyrMetaInfo zephyrDetails, ZephyrConfig zephyrCfg, String key) {
-        log.info(String.format("getting issue by key=%s", key));
+    private int createAndUpdateZephyrExecution(ZephyrMetaInfo zephyrDetails, ZephyrConfig zephyrCfg, String key) {
+        log.info(String.format("Getting issue by key=%s", key));
         String issueId = zephyrService.getIssueByKey(key);
-        log.info(String.format("got issue id=%s", issueId));
+        log.info(String.format("Got issue id=%s", issueId));
 
-        String executionId = zephyrService.createNewExecution(issueId, zephyrDetails, zephyrCfg);
-        log.info(String.format("created new executionId=%s", executionId));
+        int executionId = zephyrService.createNewExecution(issueId, zephyrDetails, zephyrCfg);
+        log.info(String.format("Created new execution id=%s", executionId));
 
-        if (testData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.SUCCESS.getStatus())) {
-            zephyrService.updateExecutionId(executionId,
-                    TestStatus.PASSED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
-        } else if (testData.get(key).get(zephyrCfg.getExecutionStatusColumn()).equals(TestExecutionStatus.FAILURE.getStatus())) {
-            zephyrService.updateExecutionId(executionId,
-                    TestStatus.FAILED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
-        } else {
-            zephyrService.updateExecutionId(executionId,
+        TestExecutionStatus testExecutionStatus = TestExecutionStatus.SKIPPED;
+
+        try {
+            testExecutionStatus = TestExecutionStatus.valueOf(testData.get(key).get(zephyrCfg.getExecutionStatusColumn()));
+        } catch (IllegalArgumentException e) {
+            executionId = zephyrService.updateExecutionId(executionId,
                     TestStatus.NOT_EXECUTED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
+
+            return executionId;
         }
+
+        switch (testExecutionStatus) {
+            case SUCCESS:
+                executionId = zephyrService.updateExecutionId(executionId,
+                        TestStatus.PASSED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
+                break;
+            case FAILURE:
+                executionId = zephyrService.updateExecutionId(executionId,
+                        TestStatus.FAILED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
+                break;
+            case SKIPPED:
+                executionId = zephyrService.updateExecutionId(executionId,
+                        TestStatus.NOT_EXECUTED.getId(), testData.get(key).get(zephyrCfg.getCommentsColumn()));
+                break;
+            default:
+                log.error(String.format("Invalid execution status %s", testExecutionStatus.getStatus()));
+        }
+
+        return executionId;
     }
 
 }
