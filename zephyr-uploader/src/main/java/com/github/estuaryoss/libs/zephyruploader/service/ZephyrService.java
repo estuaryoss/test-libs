@@ -4,13 +4,17 @@ import com.github.estuaryoss.libs.zephyruploader.component.ZephyrConfig;
 import com.github.estuaryoss.libs.zephyruploader.model.ZephyrMetaInfo;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.config.HttpClientConfig;
+import io.restassured.config.HttpClientConfig.HttpClientFactory;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +40,7 @@ public class ZephyrService {
                 .setRelaxedHTTPSValidation()
                 .setAuth(preemptive().basic(zephyrConfig.getUsername(), zephyrConfig.getPassword()))
 //                .addFilter(new RequestLoggingFilter())
-                .addFilter(new ResponseLoggingFilter())
+//                .addFilter(new ResponseLoggingFilter())
                 .build();
     }
 
@@ -58,6 +62,9 @@ public class ZephyrService {
     public String getIssueByKey(String issueKey) {
         Response httpResponse = RestAssured.given()
                 .spec(this.requestSpecification)
+                .config(RestAssuredConfig
+                        .config()
+                        .httpClient(HttpClientConfig.httpClientConfig().httpClientFactory(getHttpClientConfigWithRetry())))
                 .log()
                 .uri()
                 .get("/rest/api/2/issue/" + issueKey);
@@ -209,6 +216,9 @@ public class ZephyrService {
 
         Response httpResponse = RestAssured.given()
                 .spec(this.requestSpecification)
+                .config(RestAssuredConfig
+                        .config()
+                        .httpClient(HttpClientConfig.httpClientConfig().httpClientFactory(getHttpClientConfigWithRetry())))
                 .header("Content-Type", ContentType.JSON)
                 .body(jsonBody)
                 .log()
@@ -217,22 +227,25 @@ public class ZephyrService {
 
         ResponseBody responseBody = httpResponse.getBody();
 
-        String id = (String) responseBody.as(Map.class).keySet().toArray()[0];
         assertThat(httpResponse.getStatusCode())
                 .withFailMessage(String.format("Failed to create new execution for issueId=%s, requestBody=%s, responseBody=%s",
                         issueId, jsonBody, responseBody))
                 .isEqualTo(HttpStatus.SC_OK);
+        String id = String.valueOf(responseBody.as(Map.class).keySet().toArray()[0]);
 
         return id;
     }
 
-    public void updateExecutionId(String executionId, int status, String comment) {
+    public String updateExecutionId(String executionId, int status, String comment) {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("status", status);
         jsonBody.put("comment", comment);
 
         Response httpResponse = RestAssured.given()
                 .spec(this.requestSpecification)
+                .config(RestAssuredConfig
+                        .config()
+                        .httpClient(HttpClientConfig.httpClientConfig().httpClientFactory(getHttpClientConfigWithRetry())))
                 .header("Content-Type", ContentType.JSON)
                 .body(jsonBody)
                 .log()
@@ -245,6 +258,10 @@ public class ZephyrService {
                 .withFailMessage(String.format("Failed to update execution id=%s, requestBody=%s, responseBody=%s",
                         executionId, jsonBody.toJSONString(), responseBody))
                 .isEqualTo(HttpStatus.SC_OK);
+
+        String id = String.valueOf(responseBody.as(Map.class).get("id"));
+
+        return id;
     }
 
     public String getVersionForProjectId(String versionName, String projectId) {
@@ -296,5 +313,14 @@ public class ZephyrService {
         }
 
         return version;
+    }
+
+    private HttpClientFactory getHttpClientConfigWithRetry() {
+        return () -> {
+            DefaultHttpClient defaultHttpClient = new DefaultHttpClient();
+            defaultHttpClient.setHttpRequestRetryHandler(new StandardHttpRequestRetryHandler(3, true));
+
+            return defaultHttpClient;
+        };
     }
 }
